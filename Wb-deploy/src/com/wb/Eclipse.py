@@ -72,7 +72,7 @@ class Eclipse(object):
         return "%s%s" % (self.major_part, self.minor_part)
 
     def shortWithDots(self):
-        return "%.s%" % (self.major_part, self.minor_part)
+        return "%s.%s" % (self.major_part, self.minor_part)
 
     def displayFull(self):
         print self.fullWithDots()

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Wb-deploy</name>
-	<comment>Code to deploy WB to Eclipse</comment>
+	<name>WB-Release</name>
+	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
 	</buildSpec>
 	<natures>
-		<nature>org.python.pydev.pythonNature</nature>
 	</natures>
 </projectDescription>
