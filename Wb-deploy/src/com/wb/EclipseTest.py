@@ -9,29 +9,24 @@ from com.wb.Eclipse import Eclipse
 class Test(unittest.TestCase):
 
   def setUp(self):
-    pass
-
-  def tearDown(self):
-    pass
+    self.eclipse421 = Eclipse()
+    self.eclipse421.parseVersion("4.2.1")
 
   def testCreation(self):
-    eclipse421 = Eclipse()
-    eclipse421.parseVersion("4.2.1")
-    eclipse421.displayFull()
-    self.assertEqual("4", eclipse421.major())
-    self.assertEqual("2", eclipse421.minor())
-    self.assertEqual("1", eclipse421.patch())
+    self.assertEqual("4", self.eclipse421.major())
+    self.assertEqual("2", self.eclipse421.minor())
+    self.assertEqual("1", self.eclipse421.patch())
 
   def testFormating(self):
     eclipse421 = Eclipse()
     eclipse421.parseVersion("4.2.1")
-    formated = eclipse421.fullWithoutDots()
+    formated = self.eclipse421.fullWithoutDots()
     self.assertEqual("421", formated)
-    formated = eclipse421.fullWithDots()
+    formated = self.eclipse421.fullWithDots()
     self.assertEqual("4.2.1", formated)
-    formated = eclipse421.shortWintoutDots()
+    formated = self.eclipse421.shortWintoutDots()
     self.assertEqual("42", formated)
-    formated = eclipse421.shortWithDots()
+    formated = self.eclipse421.shortWithDots()
     self.assertEqual("4.2", formated)
 
 if __name__ == "__main__":

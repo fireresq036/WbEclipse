@@ -5,7 +5,7 @@ Created on Feb 6, 2013
 '''
 import os
 
-class release(object):
+class Release(object):
     '''
     representation of a release
     '''
