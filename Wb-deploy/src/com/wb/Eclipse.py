@@ -25,7 +25,8 @@ class Eclipse(object):
         '''
         self.major_part = None
         self.minor_part = None
-        self.patch_part = None
+        self.service_part = None
+        self.qualifier_part = None
 
     def parseVersion(self, version):
         to_parse = str(version)
@@ -42,14 +43,16 @@ class Eclipse(object):
                 data += element
         if (len(data) > 0):
             elements.append(data)
-        if len(elements) > 3:
+        if len(elements) > 4:
             raise EclipseException("too many elements")
-        if len(elements) == 0:
+        if len(elements) < 3:
             raise EclipseException("too few elements")
         self.major_part = str(elements[0])
         self.minor_part = str(elements[1])
         if (len(elements) > 2):
-            self.patch_part = str(elements[2])
+            self.service_part = str(elements[2])
+        if (len(elements) > 3):
+            self.qualifier_part = str(elements[3])
 
     def major(self):
         return self.major_part
@@ -57,16 +60,29 @@ class Eclipse(object):
     def minor(self):
         return self.minor_part
 
-    def patch(self):
-        if self.patch_part is None:
-            raise EclipseException("no patch was specified")
-        return self.patch_part
+    def service(self):
+        if self.service_part is None:
+            raise EclipseException("no service was specified")
+        return self.service_part
+
+    def qualifier(self):
+        if self.qualifier_part is None:
+            raise EclipseException("no qualifier was specified")
+        return self.qualifier_part
+
+    def qualifierWithoutDots(self):
+        return "%s%s%s%s" % (self.major_part, self.minor_part,
+                             self.service(), self.qualifier())
+
+    def qualifierWithDots(self):
+        return "%s.%s.%s.%s" % (self.major_part, self.minor_part,
+                                self.service(), self.qualifier())
 
     def fullWithoutDots(self):
-        return "%s%s%s" % (self.major_part, self.minor_part, self.patch_part)
+        return "%s%s%s" % (self.major_part, self.minor_part, self.service())
 
     def fullWithDots(self):
-        return "%s.%s.%s" % (self.major_part, self.minor_part, self.patch_part)
+        return "%s.%s.%s" % (self.major_part, self.minor_part, self.service())
 
     def shortWintoutDots(self):
         return "%s%s" % (self.major_part, self.minor_part)
