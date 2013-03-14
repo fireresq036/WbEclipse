@@ -8,6 +8,7 @@ import tempfile
 import os
 import shutil
 from com.wb.Release import Release
+from com.wb.FileSystem import FileSystem
 
 
 class Test(unittest.TestCase):
@@ -18,7 +19,8 @@ class Test(unittest.TestCase):
     self.tool = 'D2WBtest'
     self.stage = Release.STAGE_CONTINUOUS
     self._createDirectories()
-    self.release = Release(self.base_dir, self.tool, self.stage)
+    self.release = Release(self.base_dir, self.tool, self.stage,
+                           file_system=FileSystem(testing=True))
     
 
   def _createDirectories(self):
