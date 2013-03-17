@@ -71,24 +71,26 @@ class Eclipse(object):
         return self.qualifier_part
 
     def qualifierWithoutDots(self):
-        return "%s%s%s%s" % (self.major_part, self.minor_part,
-                             self.service(), self.qualifier())
+        return '{0}{1}{2}{3}'.format(self.major_part, self.minor_part,
+                                     self.service(), self.qualifier())
 
     def qualifierWithDots(self):
-        return "%s.%s.%s.%s" % (self.major_part, self.minor_part,
-                                self.service(), self.qualifier())
+        return '{0}.{1}.{2}.{3}'.format(self.major_part, self.minor_part,
+                                        self.service(), self.qualifier())
 
     def fullWithoutDots(self):
-        return "%s%s%s" % (self.major_part, self.minor_part, self.service())
+        return '{0}{1}{2}'.format(self.major_part, self.minor_part,
+                                        self.service())
 
     def fullWithDots(self):
-        return "%s.%s.%s" % (self.major_part, self.minor_part, self.service())
+        return '{0}.{1}.{2}'.format(self.major_part, self.minor_part,
+                                        self.service())
 
     def shortWintoutDots(self):
-        return "%s%s" % (self.major_part, self.minor_part)
+        return '{0}{1}'.format(self.major_part, self.minor_part)
 
     def shortWithDots(self):
-        return "%s.%s" % (self.major_part, self.minor_part)
+        return '{0}.{1}'.format(self.major_part, self.minor_part)
 
     def displayFull(self):
         print self.fullWithDots()

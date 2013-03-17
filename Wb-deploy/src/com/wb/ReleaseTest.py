@@ -18,44 +18,58 @@ class Test(unittest.TestCase):
     self.base = 'base'
     self.tool = 'D2WBtest'
     self.stage = Release.STAGE_CONTINUOUS
+    self.file_system = FileSystem(testing=True)
     self._createDirectories()
     self.release = Release(self.base_dir, self.tool, self.stage,
-                           file_system=FileSystem(testing=True))
-    
+                           file_system=self.file_system)
 
   def _createDirectories(self):
-    tmp_dir = tempfile.mkdtemp('Rel', 'Test')
-    tmp_base = os.path.join(tmp_dir, self.base)
-    tmp_tool = os.path.join(tmp_base, self.tool)
-    tmp_stage = os.path.join(tmp_tool, self.stage)
+    tmp_dir = self.file_system.mkdtemp('Rel', 'Test')
+    tmp_base = self.file_system.join(tmp_dir, self.base)
+    tmp_tool = self.file_system.join(tmp_base, self.tool)
+    tmp_stage = self.file_system.join(tmp_tool, self.stage)
     self.version_name = 'v1.2.3.23423'
-    self.actual_path = os.path.join(tmp_stage, self.version_name)
-    self.latest_path = os.path.join(tmp_stage, 'latest')
-    self.update_path = os.path.join(self.actual_path, 'update')
-    os.makedirs(self.update_path)
-    os.symlink(self.actual_path, self.latest_path)
+    self.actual_path = self.file_system.join(tmp_stage, self.version_name)
+    self.latest_path = self.file_system.join(tmp_stage, 'latest')
+    self.update_path = self.file_system.join(self.actual_path, 'update')
+    self.file_system.makedirs(self.update_path)
+    self.file_system.symlink(self.actual_path, self.latest_path)
     
     self.zip_count = 0;
     for i in range(1,4):
-      f = open(os.path.join(self.update_path, 'zip%s.zip' % i), 'w+')
-      f.close()
+      zip_file_name = self.file_system.join(self.update_path, 
+                                            'zip{0}.zip'.format(i))
+      self.file_system.create_file(zip_file_name)
       self.zip_count += 1
     self.temp_dir = tmp_dir
     self.base_dir = tmp_base
     return
 
   def tearDown(self):
-    shutil.rmtree(self.temp_dir)
+    self.file_system._dump()
+    self.file_system.rmtree(self.temp_dir)
+    self.file_system._dump()
     self.release = None
 
 
   def testZips(self):
     zips = self.release.zips()
+    found = []
+    for count in range(0,4):
+      found.append(False)
+
     self.assertEqual(self.zip_count, len(zips))
-    self.assertTrue('zip1.zip' in zips)
-    self.assertTrue('zip3.zip' in zips)
-    self.assertFalse('zip4.zip' in zips)
-    self.assertFalse('zip0.zip' in zips)
+    for zip_file in zips:
+      index = zip_file.rfind(self.file_system.sep())
+      name = zip_file[index:]
+      index = name.rfind('.')
+      zip_number = int(name[index - 1])
+      found[zip_number] = True
+    all_found = True
+    for val in found:
+      if not val:
+        all_found = False
+    self.assertTrue('not all zips found', all_found)
 
 
   def testLatest(self):

@@ -3,7 +3,6 @@ Created on Feb 6, 2013
 
 @author: mrrussell
 '''
-import os
 from com.wb.FileSystem import FileSystem
 
 class Release(object):
@@ -27,14 +26,19 @@ class Release(object):
     self.version = version
     self.stage = stage
     self.file_system = file_system
-    self.working_dir = os.path.join(self.base_dir, tool, stage)
+    self.working_dir = file_system.join(self.base_dir, tool, stage)
 
   def versions(self):
     all_versions = []
     for name in self.file_system.listdir(self.working_dir):
-        if name != 'latest':
-            all_versions.append(name)
+        if not 'latest' in name[-7:]:
+            all_versions.append(self._lastElement(name))
     return all_versions
+
+  def _lastElement(self, path):
+    index = path.rfind(self.file_system.sep())
+    return path[index + 1:]
+
 
   def latest(self):
     latest = self.file_system.join(self.working_dir, 'latest');
