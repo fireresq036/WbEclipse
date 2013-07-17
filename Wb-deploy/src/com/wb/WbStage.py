@@ -133,7 +133,6 @@ USAGE
     else:
       product_dir = 'D2GWT'
       product_zip_name = 'GWTDesigner_v%s_UpdateSite_for_Eclipse%s.zip'
-    base_stage_dir = path.join(base_stage_dir, args.environment)
     base_product_dir = path.join(base_product_dir, product_dir,
                                  args.environment, build, 'update') 
 
@@ -168,7 +167,7 @@ USAGE
   if not path.exists(base_stage_dir):
     os.makedirs(base_stage_dir)
 
-  unit_staging_dir = path.join(base_stage_dir, unit, build)
+  unit_staging_dir = path.join(base_stage_dir, unit, args.environment, build)
   print 'creating staging dir for %s: %s' % (args.product, unit_staging_dir)
   if not path.exists(unit_staging_dir):
     os.makedirs(unit_staging_dir)
