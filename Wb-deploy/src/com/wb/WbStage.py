@@ -100,7 +100,7 @@ USAGE
                         help='base to stage the release '
                         '[default: %(default)s]')
     parser.add_argument('--product', dest='product', action = 'store',
-                        default = 'wbpro', choices = ['wbpro', 'gwtd'],
+                        default = 'wbpro', choices = ['wbpro', 'gwt'],
                         help = 'the product to stage '
                         '[default: %(default)s]')
     parser.add_argument('--environment', dest='environment', action = 'store',
