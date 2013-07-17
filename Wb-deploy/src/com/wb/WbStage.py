@@ -17,6 +17,8 @@ It defines classes_and_methods
 
 import argparse
 import os
+import shutil
+import subprocess
 import sys
 
 from os import path
@@ -56,8 +58,6 @@ def main(argv=None): # IGNORE:C0111
     sys.argv.extend(argv)
 
   print sys.argv
-  products = enum('ALL', 'WBPRO', 'GWTD')
-  stage = enum('integration', 'release')
 
   program_name = os.path.basename(sys.argv[0])
   program_version = "v%s" % __version__
@@ -80,14 +80,15 @@ USAGE
 ''' % (program_shortdesc, str(__date__))
   default_product_base = path.join('/', 'usr', 'local', 'google', 'kalamath',
                                    'builds')
-  default_staging_base = path.join(path.expanduser('~'), 'stagging', 'products')
+  default_staging_base = path.join(path.expanduser('~'), 'stagging')
   try:
 
     # Setup argument parser
-    parser = argparse.ArgumentParser()
-#                            description=program_license,
-#                            formatter_class=RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(description=program_license,
+                                     formatter_class=
+                                     argparse.RawDescriptionHelpFormatter)
     parser.add_argument('build', help = 'the build to use')
+    parser.add_argument('version', help = 'product version')
     parser.add_argument('--base_product_dir', dest='base_product_dir',
                         action='store',
                         default=default_product_base,
@@ -99,12 +100,18 @@ USAGE
                         help='base to stage the release '
                         '[default: %(default)s]')
     parser.add_argument('--product', dest='product', action = 'store',
-                        default = 'all', choices = ['all', 'wbpro', 'gwtd'],
+                        default = 'wbpro', choices = ['wbpro', 'gwtd'],
                         help = 'the product to stage '
                         '[default: %(default)s]')
-    parser.add_argument('--stage', dest='stage', action = 'store',
-                        default = 'all', choices = ['integration', ''],
-                        help = 'the product to stage '
+    parser.add_argument('--environment', dest='environment', action = 'store',
+                        default = 'integration',
+                        choices = ['integration', 'release'],
+                        help = 'environment to stage '
+                        '[default: %(default)s]')
+    parser.add_argument('--eclipse_versions', dest='eclipse_versions',
+                        action = 'store',
+                        default = ['3.6', '3.7', '4.2', '4.3'], nargs='+',
+                        help = 'versions of eclipse to copy for '
                         '[default: %(default)s]')
     parser.add_argument('-v', '--verbose', dest='verbose', action='count',
                         help='set verbosity level [default: %(default)s]')
@@ -118,24 +125,25 @@ USAGE
     print 'after parsing'
     verbose = args.verbose
     base_product_dir = args.base_product_dir
-    base_stage_dir = args.base_stage_dir
+    base_stage_dir = path.join(args.base_stage_dir, 'products')
     build = args.build
-    if args.product is 'wppro':
-      product = products.WBPRO
-    elif args.product is 'gwtd':
-      product = products.GWTD
+    if args.product == 'wbpro':
+      product_dir = 'D2WBPro'
+      product_zip_name = 'WBPro_v%s_UpdateSite_for_Eclipse%s.zip'
     else:
-      product = products.ALL
+      product_dir = 'D2GWT'
+      product_zip_name = 'GWTDesigner_v%s_UpdateSite_for_Eclipse%s.zip'
+    base_stage_dir = path.join(base_stage_dir, args.environment)
+    base_product_dir = path.join(base_product_dir, product_dir,
+                                 args.environment, build, 'update') 
 
     if verbose > 0:
       print("Verbose mode on")
 
+    #create the staging directories
+
     if build is None:
       raise CLIError("You must specify a build.")
-    print 'Staging product %s' % products.reverse_mapping[product]
-    print ' from %s' % base_product_dir
-    print ' using build %s' % build
-    print ' to %s' % base_stage_dir
 
   except KeyboardInterrupt:
     print "key"
@@ -150,6 +158,49 @@ USAGE
     sys.stderr.write(indent + "  for help use --help")
     return 2
 
+  unit = 'd2' + args.product
+  print 'Staging product %s' % unit
+  print ' to %s: %s' % (args.environment, ', '.join(args.eclipse_versions))
+  print ' from %s' % base_product_dir
+  print ' using build %s' % build
+  print ' to %s' % base_stage_dir
+
+  if not path.exists(base_stage_dir):
+    os.makedirs(base_stage_dir)
+
+  unit_staging_dir = path.join(base_stage_dir, unit, build)
+  print 'creating staging dir for %s: %s' % (args.product, unit_staging_dir)
+  if not path.exists(unit_staging_dir):
+    os.makedirs(unit_staging_dir)
+  for eclipse_version in args.eclipse_versions:
+    v_dir = path.join(unit_staging_dir, eclipse_version)
+    if not path.exists(v_dir):
+      os.makedirs(v_dir)
+    stage_file_name = path.join(v_dir, 
+                                  product_zip_name % (args.version, 
+                                                      eclipse_version))
+    product_file_name = path.join(base_product_dir, 
+                                  product_zip_name % (args.version, 
+                                                      eclipse_version))
+    shutil.copyfile(product_file_name, stage_file_name)
+    md5_file = open('%s.md5' % stage_file_name, 'w')
+    cmd = ['/usr/bin/md5sum', stage_file_name]
+    print 'running command: %s' % ' '.join(cmd)
+    ret_code = subprocess.call(cmd, stdout=md5_file)
+    if ret_code:
+      raise Exception('%s failed with %s' % (' '.join(cmd). ret_code))
+    md5_file.close()
+    cmd = ['/usr/bin/md5sum', '--check', '%s.md5' % stage_file_name]
+    print 'running command: %s' % ' '.join(cmd)
+    ret_code = subprocess.call(cmd)
+    if ret_code:
+      raise Exception('%s failed with %s' % (' '.join(cmd), ret_code))
+    cmd = ['/usr/bin/unzip', stage_file_name]
+    print 'running command: %s' % ' '.join(cmd)
+    ret_code = subprocess.call(cmd, cwd=v_dir)
+    if ret_code:
+      raise Exception('%s failed with %s' % (' '.join(cmd), ret_code))
+    
 
 if __name__ == "__main__":
   print " start"
