@@ -26,3 +26,19 @@ func TestFullVersion(t *testing.T) {
      	t.Errorf("data.FullVersion() = %v, want %v", result, expect)
      }
 }
+
+func TestMajorMinorNoDot(t *testing.T) {
+     const expect = "42"
+
+     if result := Eclipse_42.MajorMinorNoDot(); result != expect {
+     	t.Errorf("Eclipse_42.MajorMinorNoDot() = %v, want %v", result, expect)
+     }
+}
+
+func TestMajorMinorServiceNoDot(t *testing.T) {
+     const expect = "420"
+
+     if result := Eclipse_42.MajorMinorServiceNoDot(); result != expect {
+     	t.Errorf("Eclipse_42.MajorMinorServiceNoDot() = %v, want %v", result, expect)
+     }
+}
