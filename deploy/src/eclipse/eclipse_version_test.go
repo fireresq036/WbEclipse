@@ -2,6 +2,16 @@ package eclipse
 
 import "testing"
 
+func TestFullVersion(t *testing.T) {
+  var data = EclipseData{4, 3, 2, "abc"}
+  var expect = "4.3.2.abc"
+
+  if result := data.FullVersion(); result != expect {
+    t.Errorf("data.FullVersion() = %v, want %v", result, expect)
+  }
+}
+
+/*
 func TestMajorMinor(t *testing.T) {
   const expect = "4.2"
 
@@ -15,15 +25,6 @@ func TestMajorMinorService(t *testing.T) {
 
   if result := Eclipse_42.MajorMinorService(); result != expect {
     t.Errorf("Eclipse_42.MajorMinorService() = %v, want %v", result, expect)
-  }
-}
-
-func TestFullVersion(t *testing.T) {
-  var data = eclipseData{4, 3, 2, "abc"}
-  var expect = "4.3.2.abc"
-
-  if result := data.FullVersion(); result != expect {
-    t.Errorf("data.FullVersion() = %v, want %v", result, expect)
   }
 }
 
@@ -42,3 +43,5 @@ func TestMajorMinorServiceNoDot(t *testing.T) {
     t.Errorf("Eclipse_42.MajorMinorServiceNoDot() = %v, want %v", result, expect)
   }
 }
+*/
+

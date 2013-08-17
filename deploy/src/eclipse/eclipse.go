@@ -17,7 +17,7 @@ type productS struct {
 	env string
 	base string
 	location string
-	versions []eclipseI
+	versions []EclipseVersion
 }
 
 func init() {
